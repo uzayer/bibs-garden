@@ -107,7 +107,7 @@ const NoteIndexView = ({
           <li key={note.slug} className="border-t border-black/15">
             <Link
               href={`${basePath}/${note.slug}`}
-              className="group grid grid-cols-[2.5rem_1fr_auto] items-center gap-x-4 gap-y-2 px-6 py-6 transition-colors duration-300 hover:bg-black hover:text-[#F9F7EF] md:grid-cols-[4rem_minmax(0,1.2fr)_minmax(0,1fr)_auto] md:gap-x-8 md:px-10"
+              className="group grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 px-6 py-6 transition-colors duration-300 hover:bg-black hover:text-[#F9F7EF] md:grid-cols-[4rem_minmax(0,1.2fr)_minmax(0,1fr)_auto] md:gap-x-8 md:px-10"
             >
               <span className="font-roman text-xs tracking-widest opacity-50">
                 {String(i + 1).padStart(2, '0')}
@@ -115,13 +115,13 @@ const NoteIndexView = ({
               <h2 className="font-custom text-balance break-words text-3xl uppercase leading-[0.9] md:text-5xl">
                 {note.title}
               </h2>
-              <div className="col-start-2 row-start-2 flex flex-col gap-2 md:col-start-3 md:row-start-1">
+              <div className="col-start-2 row-start-2 flex min-w-0 flex-col gap-2 md:col-start-3 md:row-start-1">
                 {note.description && (
-                  <p className="line-clamp-2 text-sm leading-snug opacity-70 first-letter:uppercase">
+                  <p className="line-clamp-2 text-sm leading-snug wrap-anywhere opacity-70 first-letter:uppercase">
                     {note.description}
                   </p>
                 )}
-                <p className="font-roman text-[0.65rem] uppercase tracking-widest opacity-50">
+                <p className="font-roman text-[0.65rem] uppercase tracking-widest wrap-anywhere opacity-50">
                   {[note.source, note.tended, ...note.tags.map(tagLabel)]
                     .filter(Boolean)
                     .join(' · ')}
