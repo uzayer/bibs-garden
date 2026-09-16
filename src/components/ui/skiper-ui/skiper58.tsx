@@ -64,6 +64,7 @@ const STAGGER = 0.035
 // Each copy of a letter travels twice its own line box, and the clip window is padded by
 // 0.25em on each side (cancelled by a negative margin, so layout is unchanged). Together
 // that keeps the parked copy out of view regardless of the font's metrics or line-height.
+// The padding ignores the pointer so neighbouring items' hover areas don't overlap.
 const TRAVEL = '200%'
 
 const TextRoll: React.FC<{
@@ -78,10 +79,13 @@ const TextRoll: React.FC<{
       initial="initial"
       whileHover="hovered"
       whileTap="hovered"
-      className={cn('relative -my-[0.25em] block overflow-hidden py-[0.25em]', className)}
+      className={cn(
+        'pointer-events-none relative -my-[0.25em] block overflow-hidden py-[0.25em]',
+        className,
+      )}
     >
       <span className="sr-only">{children}</span>
-      <span aria-hidden className="block">
+      <span aria-hidden className="pointer-events-auto block">
         {letters.map((l, i) => {
           const delay = center ? STAGGER * Math.abs(i - (letters.length - 1) / 2) : STAGGER * i
           const transition = { ease: 'easeInOut', delay } as const
