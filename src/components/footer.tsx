@@ -22,7 +22,7 @@ const columns = [
 
 const Footer = () => {
   return (
-    <footer className="relative w-full overflow-hidden bg-[#0a0a0a] text-neutral-300">
+    <footer className="relative w-full overflow-hidden bg-[#0a0a0a] pb-[env(safe-area-inset-bottom)] text-neutral-300">
       <div className="mx-auto max-w-7xl px-4 md:px-8">
         <div className="h-px w-full bg-neutral-800" />
 
@@ -64,7 +64,7 @@ const Footer = () => {
 
       <p
         aria-hidden
-        className="pointer-events-none mt-24 -mb-[0.12em] select-none text-center font-custom text-[12.5vw] leading-none tracking-tighter whitespace-nowrap text-neutral-900"
+        className="pointer-events-none mt-24 -mb-[0.12em] select-none text-center font-custom text-[18vw] leading-none md:text-[12.5vw] tracking-tighter whitespace-nowrap text-neutral-900"
       >
         {NAME}
       </p>
