@@ -1,6 +1,7 @@
+import Image from 'next/image'
 import Link from 'next/link'
 
-import { INSTAGRAM_URL, isExternal } from '@/lib/site'
+import { INSTAGRAM_URL, gravatarUrl, isExternal } from '@/lib/site'
 
 const NAME = 'zuhayermasud'
 
@@ -29,9 +30,13 @@ const Footer = () => {
         <div className="grid gap-12 pt-20 md:grid-cols-[1.2fr_2fr] md:px-16">
           <div className="flex flex-col gap-6">
             <Link href="/" className="flex w-fit items-center gap-3">
-              <span className="flex size-10 items-center justify-center rounded-lg bg-white text-lg font-bold text-black">
-                Z
-              </span>
+              <Image
+                src={gravatarUrl(160)}
+                alt=""
+                width={40}
+                height={40}
+                className="size-10 rounded-lg bg-neutral-800 object-cover"
+              />
               <span className="text-lg font-medium text-white">{NAME}</span>
             </Link>
             <p className="max-w-xs text-neutral-500">
