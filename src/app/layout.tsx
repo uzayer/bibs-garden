@@ -2,7 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import localFont from 'next/font/local'
 
-import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site'
+import { pageMetadata } from '@/lib/metadata'
+import { AUTHOR, SITE_NAME, SITE_URL } from '@/lib/site'
 import './globals.css'
 
 const geistSans = Geist({
@@ -26,25 +27,15 @@ const skiperRoman = localFont({
 })
 
 export const metadata: Metadata = {
+  ...pageMetadata({ path: '/' }),
   metadataBase: new URL(SITE_URL),
   title: {
     default: SITE_NAME,
-    template: `%s · ${SITE_NAME}`,
+    template: `%s | ${SITE_NAME}`,
   },
-  description: SITE_DESCRIPTION,
-  authors: [{ name: 'Zuhayer Masud' }],
-  openGraph: {
-    title: SITE_NAME,
-    description: SITE_DESCRIPTION,
-    url: SITE_URL,
-    siteName: SITE_NAME,
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: SITE_NAME,
-    description: SITE_DESCRIPTION,
-  },
+  applicationName: SITE_NAME,
+  authors: [{ name: AUTHOR, url: SITE_URL }],
+  creator: AUTHOR,
 }
 
 // Let the page run under Safari's floating toolbar; the footer pads itself by the safe-area inset

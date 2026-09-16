@@ -16,6 +16,8 @@ import {
   tagLabel,
   tendedDate,
 } from '@/lib/garden'
+import { isoDate, pageMetadata, titleCase } from '@/lib/metadata'
+import { AUTHOR } from '@/lib/site'
 
 /** `[[Note]]` in frontmatter isn't touched by the remark plugins, so strip it here. */
 const plain = (value: string) => value.replace(/\[\[([^\]|]+\|)?([^\]]+)\]\]/g, '$2')
@@ -25,14 +27,20 @@ export const noteStaticParams = (section: Section) => getSlugs(section).map((slu
 export const noteMetadata = (section: Section, slug: string): Metadata => {
   const note = getNote(section, slug)
   if (!note) return {}
-  const { title, description } = note
-  return {
-    title,
-    description,
-    // Replaces the site-wide objects, so the note's own title shows on the card
-    openGraph: { title, description, type: 'article' },
-    twitter: { card: 'summary_large_image', title, description },
-  }
+  return pageMetadata({
+    title: note.title,
+    // Notes without their own description fall back to their section's
+    description: note.description ?? section.description,
+    path: `${section.href}/${encodeURIComponent(note.slug)}`,
+    openGraph: {
+      type: 'article',
+      publishedTime: isoDate(note.published ?? note.created),
+      modifiedTime: isoDate(tendedDate(note)),
+      authors: [note.author ?? AUTHOR],
+      section: titleCase(section.title),
+      tags: note.tags.map(tagLabel),
+    },
+  })
 }
 
 /** Note page shared by every garden section (`/garden/[slug]`, `/refs/[slug]`). */

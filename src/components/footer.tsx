@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { INSTAGRAM_URL, gravatarUrl, isExternal } from '@/lib/site'
+import { AUTHOR, INSTAGRAM_URL, gravatarUrl, isExternal } from '@/lib/site'
 
 const NAME = 'zuhayermasud'
 
@@ -40,7 +40,7 @@ const Footer = () => {
               <span className="text-lg font-medium text-white">{NAME}</span>
             </Link>
             <p className="max-w-xs text-neutral-500">
-              © {new Date().getFullYear()} Zuhayer Masud. All rights reserved.
+              © {new Date().getFullYear()} {AUTHOR}. All rights reserved.
             </p>
           </div>
 

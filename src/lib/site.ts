@@ -1,5 +1,6 @@
 export const INSTAGRAM_URL = 'https://www.instagram.com/zuhayermasud/'
 
+export const AUTHOR = 'Zuhayer Masud'
 export const SITE_NAME = 'bibs garden'
 export const SITE_URL = 'https://bibs-garden.vercel.app'
 export const SITE_DESCRIPTION =

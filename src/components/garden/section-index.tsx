@@ -1,9 +1,18 @@
+import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
 import { Footer } from '@/components/footer'
 import { BackLink } from '@/components/garden/back-link'
 import { NoteIndex, NoteIndexView, type NoteRow } from '@/components/garden/note-index'
 import { formatDate, getNotes, isUrl, type Section, sourceHost, tendedDate } from '@/lib/garden'
+import { pageMetadata, titleCase } from '@/lib/metadata'
+
+export const sectionMetadata = (section: Section): Metadata =>
+  pageMetadata({
+    title: titleCase(section.title),
+    description: section.description,
+    path: section.href,
+  })
 
 /** Index page shared by every garden section (`/garden`, `/refs`). */
 const SectionIndex = ({ section }: { section: Section }) => {
