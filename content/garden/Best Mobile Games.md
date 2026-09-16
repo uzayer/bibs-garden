@@ -1,13 +1,11 @@
 ---
 title: Best Mobile Games
 description: list of games i like on phone
-publish: true
 tags:
-  - type/list
   - topic/media
   - topic/games
 source: my experience
-created: 2026-03-10 12:41
+created: 2026-03-10
 ---
 
 
