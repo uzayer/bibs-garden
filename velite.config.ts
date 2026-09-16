@@ -1,23 +1,43 @@
-import type { Root } from 'mdast'
-import type { Plugin } from 'unified'
+import { existsSync } from 'node:fs'
+import { dirname, relative, resolve } from 'node:path'
+import type { Image, Link, Root, Text } from 'mdast'
+import remarkBreaks from 'remark-breaks'
 import { visit } from 'unist-util-visit'
-import { defineConfig, s, z } from 'velite'
+import { defineConfig, isRelativePath, processAsset, s, z } from 'velite'
 
 /**
- * Obsidian / MkDocs Publisher often serializes empty frontmatter keys as YAML `null`.
- * Zod's `.optional()` only treats `undefined` as absent, not `null`.
+ * Content contract
+ * ----------------
+ * The Obsidian vault is canonical. A note is published by moving it into the
+ * vault's `garden/` folder; Enveloppe mirrors that folder to `content/garden/`
+ * (attachments to `content/assets/`) and autoclean deletes anything that left it.
+ * Nothing here writes back to `content/` — Velite only reads and normalizes.
+ *
+ * Vault frontmatter (see vault `templates/Ref.md`):
+ *   title, description, tags, source, author, published, created, updated
+ * Empty keys arrive as YAML `null`, so every optional field goes through `nullish()`.
  */
-const yamlOptionalString = () =>
-  z.preprocess(
-    (v) => (v === null || v === undefined || v === '' ? undefined : v),
-    z.string().optional(),
-  )
 
-const yamlOptionalNumber = () =>
-  z.preprocess(
-    (v) => (v === null || v === undefined ? undefined : v),
-    z.number().optional(),
-  )
+const OUTPUT = {
+  data: '.velite',
+  assets: 'public/static',
+  base: '/static/',
+  // Velite's [ext] has no leading dot.
+  name: '[name]-[hash:8].[ext]',
+  clean: true,
+} as const
+
+const GARDEN_ROOT = resolve('content/garden')
+
+/** Treat YAML `null` and `''` as absent before validating. */
+const nullish = <T extends z.ZodTypeAny>(schema: T) =>
+  z.preprocess((v) => (v === null || v === '' ? undefined : v), schema.optional())
+
+/**
+ * Remark transformers are typed structurally: Velite bundles its own `unified`
+ * types, so `Plugin` from the top-level package doesn't unify with them.
+ */
+type RemarkTransformer = (tree: Root, file: { path: string }) => void | Promise<void>
 
 /** Inner part of `[[...]]`: `Page`, `Page|Alias`, `Page#Heading`, `Page#Heading|Alias`. */
 const displayFromWikilinkInner = (inner: string) => {
@@ -30,133 +50,171 @@ const displayFromWikilinkInner = (inner: string) => {
 }
 
 const wikilinkToPlain = (value: string) =>
-  value.replace(/\[\[([^\]]+)\]\]/g, (_, inner: string) =>
+  value.replace(/!?\[\[([^\]]+)\]\]/g, (_, inner: string) =>
     displayFromWikilinkInner(inner),
   )
 
-/** Strip Obsidian wikilinks in markdown bodies to plain display text (no links). */
-const remarkStripWikilinks: Plugin<[], Root> = () => (tree) => {
+/** `string | string[] | null` with wikilinks stripped, joined for display. */
+const vaultAuthor = () =>
+  z.preprocess((v) => {
+    if (v === null || v === undefined || v === '') return undefined
+    const list = Array.isArray(v) ? v : [v]
+    const joined = list
+      .map((a) => wikilinkToPlain(String(a ?? '')).trim())
+      .filter(Boolean)
+      .join(', ')
+    return joined || undefined
+  }, z.string().optional())
+
+/** Tags as a clean string list; tolerates `null`, a single string, and `#tag`. */
+const vaultTags = () =>
+  z.preprocess((v) => {
+    if (v === null || v === undefined || v === '') return []
+    const list = Array.isArray(v) ? v : [v]
+    return list
+      .filter((t) => t !== null && t !== '')
+      .map((t) => String(t).replace(/^#/, ''))
+  }, z.array(z.string()))
+
+/** Obsidian dates may be `2026-02-24` or `2026-02-24 22:51`; keep the string, reject junk. */
+const vaultDate = () =>
+  nullish(
+    z.coerce
+      .string()
+      .refine((d) => !Number.isNaN(Date.parse(d)), 'Invalid date'),
+  )
+
+const basename = (path: string) =>
+  path.split('/').pop()!.replace(/\.mdx?$/, '')
+
+/** Unicode-aware so non-Latin (e.g. Bangla) filenames don't collapse to ''. */
+const slugify = (path: string) =>
+  basename(path)
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{M}\p{N}]+/gu, '-')
+    .replace(/^-+|-+$/g, '')
+
+const safeDecode = (url: string) => {
+  try {
+    return decodeURI(url)
+  } catch {
+    return url
+  }
+}
+
+const isNoteUrl = (url: string) => /\.mdx?(?:[#?].*)?$/i.test(url)
+
+/** Strip leftover Obsidian wikilinks in text to their display text. */
+const remarkStripWikilinks = (): RemarkTransformer => (tree) => {
   visit(tree, 'text', (node) => {
-    if (typeof node.value !== 'string' || !node.value.includes('[[')) return
+    if (!node.value.includes('[[')) return
     node.value = wikilinkToPlain(node.value)
   })
 }
 
-/** String, wikilink list, or YAML null — as emitted from the vault. */
-const vaultAuthor = () =>
-  z.preprocess((v) => {
-    if (v === null || v === undefined || v === '') return undefined
-    if (typeof v === 'string') return wikilinkToPlain(v)
-    if (Array.isArray(v))
-      return v
-        .map((a) => wikilinkToPlain(String(a)))
-        .filter(Boolean)
-        .join(', ')
-    return undefined
-  }, z.string().optional())
+/**
+ * Resolve relative links/images as emitted by Enveloppe:
+ * - links/embeds to other notes → plain text (routing is not built yet, and the
+ *   target may be a private note that was never published)
+ * - relative attachments → copied to `public/static` (decoded first, since
+ *   Obsidian filenames often contain spaces)
+ * - relative targets that don't exist → plain text instead of failing the note
+ *
+ * Replaces Velite's built-in `copyLinkedFiles`, which neither decodes URLs nor
+ * tolerates `.md` targets.
+ */
+const remarkVaultLinks = (): RemarkTransformer => async (tree, file) => {
+  const toText = (node: Link | Image): Text => ({
+    type: 'text',
+    value:
+      node.type === 'image'
+        ? node.alt || ''
+        : node.children.map((c) => ('value' in c ? c.value : '')).join(''),
+  })
 
-const slugify = (path: string) =>
-  path
-    .split('/')
-    .pop()!
-    .replace(/\.mdx?$/, '')
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '')
+  const jobs: Promise<void>[] = []
+
+  visit(tree, ['link', 'image'], (node, index, parent) => {
+    const n = node as Link | Image
+    if (!parent || index === undefined || !isRelativePath(n.url)) return
+
+    const url = safeDecode(n.url)
+    const target = resolve(dirname(file.path), url.replace(/[#?].*$/, ''))
+
+    if (isNoteUrl(url) || !existsSync(target)) {
+      if (!isNoteUrl(url))
+        console.warn(`[velite] missing attachment "${url}" in ${file.path}`)
+      parent.children[index] = toText(n)
+      return
+    }
+
+    jobs.push(
+      processAsset(url, file.path, OUTPUT.name, OUTPUT.base).then((src) => {
+        n.url = src
+      }),
+    )
+  })
+
+  await Promise.all(jobs)
+}
+
+/** Stub notes (frontmatter only) are valid garden seedlings, not errors. */
+const noteBody = () =>
+  s.markdown().catch((ctx) => {
+    const onlyEmpty = ctx.error.issues.every(
+      (i) => i.message === 'The content is empty',
+    )
+    if (!onlyEmpty)
+      console.warn(
+        `[velite] markdown failed: ${ctx.error.issues.map((i) => i.message).join('; ')}`,
+      )
+    return ''
+  })
 
 const gardenNotes = {
   name: 'GardenNote',
   pattern: 'garden/**/*.md',
   schema: s
     .object({
-      title: s.string(),
-      description: yamlOptionalString(),
-      publish: s.boolean().default(true),
-      tags: s.array(s.string()).default([]),
-      source: yamlOptionalString(),
+      title: nullish(z.string()),
+      description: nullish(z.string()),
+      tags: vaultTags(),
+      source: nullish(z.string()),
       author: vaultAuthor(),
-      published: yamlOptionalString(),
-      created: yamlOptionalString(),
-      status: yamlOptionalString(),
-      content: s.markdown(),
+      published: vaultDate(),
+      created: vaultDate(),
+      updated: vaultDate(),
+      content: noteBody(),
     })
     .transform((data, { meta }) => ({
       ...data,
+      title: data.title ?? basename(meta.path),
       slug: slugify(meta.path),
-    })),
-}
-
-const libraryType = z.enum(['book', 'film', 'anime', 'tv'])
-const libraryStatus = z.enum([
-  'want',
-  'reading',
-  'watching',
-  'completed',
-  'dropped',
-])
-
-const libraryItems = {
-  name: 'LibraryItem',
-  pattern: 'library/**/*.md',
-  schema: s
-    .object({
-      title: s.string(),
-      description: yamlOptionalString(),
-      publish: s.boolean().default(true),
-      tags: s.array(s.string()).default([]),
-      type: z.preprocess(
-        (v) =>
-          v === null || v === undefined || v === '' ? undefined : v,
-        libraryType.optional().default('book'),
-      ),
-      status: z.preprocess(
-        (v) => (v === null || v === undefined || v === '' ? undefined : v),
-        libraryStatus.optional(),
-      ),
-      cover: yamlOptionalString(),
-      rating: yamlOptionalNumber(),
-      author: yamlOptionalString(),
-      year: yamlOptionalNumber(),
-      content: s.markdown(),
-    })
-    .transform((data, { meta }) => ({
-      ...data,
-      slug: slugify(meta.path),
-    })),
-}
-
-const refs = {
-  name: 'Ref',
-  pattern: 'ref/**/*.md',
-  schema: s
-    .object({
-      title: s.string(),
-      description: yamlOptionalString(),
-      publish: s.boolean().default(true),
-      tags: s.array(s.string()).default([]),
-      source: yamlOptionalString(),
-      author: vaultAuthor(),
-      published: yamlOptionalString(),
-      created: yamlOptionalString(),
-      content: s.markdown(),
-    })
-    .transform((data, { meta }) => ({
-      ...data,
-      slug: slugify(meta.path),
+      /** Sub-folder inside the vault's `garden/` ('' for top level, e.g. 'ref'). */
+      folder: relative(GARDEN_ROOT, dirname(meta.path)).split('\\').join('/'),
     })),
 }
 
 export default defineConfig({
   root: 'content',
   markdown: {
-    remarkPlugins: [remarkStripWikilinks],
+    // Velite's copier is replaced by remarkVaultLinks (see above).
+    copyLinkedFiles: false,
+    // Obsidian renders single newlines as line breaks by default.
+    remarkPlugins: [remarkBreaks, remarkStripWikilinks, remarkVaultLinks],
   },
-  output: {
-    data: '.velite',
-    assets: 'public/static',
-    base: '/static/',
-    name: '[name]-[hash:8][ext]',
-    clean: true,
+  output: OUTPUT,
+  collections: { gardenNotes },
+  prepare: ({ gardenNotes }) => {
+    const seen = new Map<string, string>()
+    for (const note of gardenNotes) {
+      const prev = seen.get(note.slug)
+      if (prev)
+        throw new Error(
+          `Duplicate slug "${note.slug}": "${prev}" and "${note.title}" — rename one in the vault.`,
+        )
+      seen.set(note.slug, note.title)
+    }
   },
-  collections: { gardenNotes, libraryItems, refs },
 })
