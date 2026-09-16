@@ -54,7 +54,7 @@ Raw Obsidian wikilinks (`[[Page]]`, `[[Page|Alias]]`, headings in the target, et
 
 **Imports:** Application code consumes generated modules via the `#content` alias (see `CLAUDE.md`).
 
-**Constraint:** Velite runs as its own CLI (`pnpm build:content` / `pnpm dev:content`), not as a Next.js webpack plugin.
+**Constraint:** Velite runs as its own CLI (`bun run build:content` / `bun run dev:content`), not as a Next.js webpack plugin.
 
 ---
 

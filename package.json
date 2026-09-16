@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev:content": "velite dev",
-    "dev:next": "next dev",
-    "dev": "run-p dev:*",
-    "build:content": "velite build --clean",
-    "build:next": "next build",
-    "build": "run-s build:*",
-    "start": "next start",
-    "lint": "eslint",
+    "dev:content": "bun --bun velite dev",
+    "dev:next": "bun --bun next dev",
+    "dev": "bun run --parallel dev:content dev:next",
+    "build:content": "bun --bun velite build --clean",
+    "build:next": "bun --bun next build",
+    "build": "bun run --sequential build:content build:next",
+    "start": "bun --bun next start",
+    "lint": "bun --bun eslint",
     "prepare": "husky"
   },
   "dependencies": {
@@ -36,12 +36,16 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "husky": "^9.1.7",
-    "npm-run-all2": "^8.0.4",
     "remark-breaks": "^4.0.0",
     "shadcn": "^4.7.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0"
-  }
+  },
+  "trustedDependencies": [
+    "esbuild",
+    "sharp",
+    "unrs-resolver"
+  ]
 }

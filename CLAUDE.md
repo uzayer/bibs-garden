@@ -10,10 +10,10 @@ This project uses Next.js 16, which has breaking changes from earlier versions. 
 
 Before editing behavior, configuration, or APIs that depend on an external library, pull current docs with Context7 (preferred IDs below). Do not rely on training data for signatures, config options, or version-specific behavior.
 
-1. Resolve or confirm the library ID: `npx ctx7@latest library <name> "<what you need>"`
-2. Fetch: `npx ctx7@latest docs <libraryId> "<specific question>"`
+1. Resolve or confirm the library ID: `bunx ctx7@latest library <name> "<what you need>"`
+2. Fetch: `bunx ctx7@latest docs <libraryId> "<specific question>"`
 
-Use a **versioned** ID from the `library` output when the installed package version must match (e.g. Next.js). If a command fails with a quota error, use `npx ctx7@latest login` or set `CONTEXT7_API_KEY`.
+Use a **versioned** ID from the `library` output when the installed package version must match (e.g. Next.js). If a command fails with a quota error, use `bunx ctx7@latest login` or set `CONTEXT7_API_KEY`.
 
 ### Context7 library IDs (this stack)
 
@@ -38,12 +38,12 @@ To skip hooks in an emergency (e.g. CI or recover): `HUSKY=0 git commit ...` (us
 ## Commands
 
 ```bash
-pnpm dev          # velite dev + next dev in parallel (watch mode)
-pnpm build        # velite build --clean, then next build (sequential)
-pnpm lint         # eslint
+bun dev           # velite dev + next dev in parallel (watch mode)
+bun run build     # velite build --clean, then next build (sequential)
+bun run lint      # eslint
 ```
 
-Always use `pnpm`. Never `npm` or `yarn`.
+Bun is both the package manager and the runtime. Never use `node`, `npm`, `npx`, `pnpm`, or `yarn` — use `bun`, `bunx`, and `bun add`. Scripts run their CLIs with `bun --bun` so they execute on Bun instead of the `node` shebang. Use `bun run build`, not `bun build` (that is Bun's bundler).
 
 ## Architecture
 
@@ -98,4 +98,4 @@ Velite's built-in `copyLinkedFiles` is disabled. `remarkVaultLinks` replaces it:
 
 ### UI
 
-shadcn/ui with `base-nova` style, neutral base color, CSS variables enabled. Add components with `pnpm dlx shadcn add <component>`. Component files land in `src/components/ui/`.
+shadcn/ui with `base-nova` style, neutral base color, CSS variables enabled. Add components with `bunx --bun shadcn add <component>`. Component files land in `src/components/ui/`.
