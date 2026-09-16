@@ -50,9 +50,7 @@ const displayFromWikilinkInner = (inner: string) => {
 }
 
 const wikilinkToPlain = (value: string) =>
-  value.replace(/!?\[\[([^\]]+)\]\]/g, (_, inner: string) =>
-    displayFromWikilinkInner(inner),
-  )
+  value.replace(/!?\[\[([^\]]+)\]\]/g, (_, inner: string) => displayFromWikilinkInner(inner))
 
 /** `string | string[] | null` with wikilinks stripped, joined for display. */
 const vaultAuthor = () =>
@@ -71,21 +69,18 @@ const vaultTags = () =>
   z.preprocess((v) => {
     if (v === null || v === undefined || v === '') return []
     const list = Array.isArray(v) ? v : [v]
-    return list
-      .filter((t) => t !== null && t !== '')
-      .map((t) => String(t).replace(/^#/, ''))
+    return list.filter((t) => t !== null && t !== '').map((t) => String(t).replace(/^#/, ''))
   }, z.array(z.string()))
 
 /** Obsidian dates may be `2026-02-24` or `2026-02-24 22:51`; keep the string, reject junk. */
 const vaultDate = () =>
-  nullish(
-    z.coerce
-      .string()
-      .refine((d) => !Number.isNaN(Date.parse(d)), 'Invalid date'),
-  )
+  nullish(z.coerce.string().refine((d) => !Number.isNaN(Date.parse(d)), 'Invalid date'))
 
 const basename = (path: string) =>
-  path.split('/').pop()!.replace(/\.mdx?$/, '')
+  path
+    .split('/')
+    .pop()!
+    .replace(/\.mdx?$/, '')
 
 /** Unicode-aware so non-Latin (e.g. Bangla) filenames don't collapse to ''. */
 const slugify = (path: string) =>
@@ -143,8 +138,7 @@ const remarkVaultLinks = (): RemarkTransformer => async (tree, file) => {
     const target = resolve(dirname(file.path), url.replace(/[#?].*$/, ''))
 
     if (isNoteUrl(url) || !existsSync(target)) {
-      if (!isNoteUrl(url))
-        console.warn(`[velite] missing attachment "${url}" in ${file.path}`)
+      if (!isNoteUrl(url)) console.warn(`[velite] missing attachment "${url}" in ${file.path}`)
       parent.children[index] = toText(n)
       return
     }
@@ -162,13 +156,9 @@ const remarkVaultLinks = (): RemarkTransformer => async (tree, file) => {
 /** Stub notes (frontmatter only) are valid garden seedlings, not errors. */
 const noteBody = () =>
   s.markdown().catch((ctx) => {
-    const onlyEmpty = ctx.error.issues.every(
-      (i) => i.message === 'The content is empty',
-    )
+    const onlyEmpty = ctx.error.issues.every((i) => i.message === 'The content is empty')
     if (!onlyEmpty)
-      console.warn(
-        `[velite] markdown failed: ${ctx.error.issues.map((i) => i.message).join('; ')}`,
-      )
+      console.warn(`[velite] markdown failed: ${ctx.error.issues.map((i) => i.message).join('; ')}`)
     return ''
   })
 

@@ -22,16 +22,17 @@
   "menuColor": "default",
   "menuAccent": "subtle",
   "registries": {
-    "@aceternity": "https://ui.aceternity.com/registry/{name}.json",
-    "@magicui": "https://magicui.design/r/{name}.json",
-    "@shadcnblocks": {
-      "url": "https://shadcnblocks.com/r/{name}.json",
+    "@skiper-ui": {
+      "url": "https://skiper-ui.com/r/{name}.json",
       "headers": {
-        "Authorization": "Bearer ${SHADCNBLOCKS_API_KEY}"
+        "Authorization": "Bearer ${SKIPER_LICENSE_KEY}"
       }
     },
-    "@tailark-pro": {
-      "url": "https://tailark.com/r/{name}.json"
+    "@tailark": {
+      "url": "https://tailark.com/r/{name}.json",
+      "headers": {
+        "x-api-key": "${TAILARK_API_KEY}"
+      }
     }
   }
 }

@@ -17,16 +17,16 @@ Use a **versioned** ID from the `library` output when the installed package vers
 
 ### Context7 library IDs (this stack)
 
-| Topic | Context7 ID | Notes |
-| --- | --- | --- |
-| Next.js (match ~16.2.x) | `/vercel/next.js/v16.2.2` | Bump segment if project `next` version diverges |
-| React | `/reactjs/react.dev` | Official docs; `/facebook/react/v19_2_0` for version-tied API |
-| Velite | `/zce/velite` | Content pipeline, schemas, build |
-| Tailwind CSS | `/tailwindlabs/tailwindcss.com` | v4 utilities, `@tailwindcss/postcss` |
-| TypeScript | `/microsoft/typescript` | Prefer `/v5.9.3` (or nearest) when version-specific |
-| Base UI (`@base-ui/react`) | `/mui/base-ui` | Headless primitives used with shadcn-style setup |
-| shadcn/ui & CLI | `/shadcn-ui/ui` | Components, CLI, registries |
-| ESLint | `/eslint/eslint` | Flat config, rule sets |
+| Topic                      | Context7 ID                     | Notes                                                         |
+| -------------------------- | ------------------------------- | ------------------------------------------------------------- |
+| Next.js (match ~16.2.x)    | `/vercel/next.js/v16.2.2`       | Bump segment if project `next` version diverges               |
+| React                      | `/reactjs/react.dev`            | Official docs; `/facebook/react/v19_2_0` for version-tied API |
+| Velite                     | `/zce/velite`                   | Content pipeline, schemas, build                              |
+| Tailwind CSS               | `/tailwindlabs/tailwindcss.com` | v4 utilities, `@tailwindcss/postcss`                          |
+| TypeScript                 | `/microsoft/typescript`         | Prefer `/v5.9.3` (or nearest) when version-specific           |
+| Base UI (`@base-ui/react`) | `/mui/base-ui`                  | Headless primitives used with shadcn-style setup              |
+| shadcn/ui & CLI            | `/shadcn-ui/ui`                 | Components, CLI, registries                                   |
+| Oxlint & Oxfmt             | `/websites/oxc_rs_guide_usage`  | Lint rules, `.oxlintrc.json`, `.oxfmtrc.json`                 |
 
 ## Git commits
 
@@ -40,10 +40,13 @@ To skip hooks in an emergency (e.g. CI or recover): `HUSKY=0 git commit ...` (us
 ```bash
 bun dev           # velite dev + next dev in parallel (watch mode)
 bun run build     # velite build --clean, then next build (sequential)
-bun run lint      # eslint
+bun run lint      # oxlint (bun run lint:fix to autofix)
+bun run fmt       # oxfmt, writes changes (bun run fmt:check to verify only)
 ```
 
 Bun is both the package manager and the runtime. Never use `node`, `npm`, `npx`, `pnpm`, or `yarn` — use `bun`, `bunx`, and `bun add`. Scripts run their CLIs with `bun --bun` so they execute on Bun instead of the `node` shebang. Use `bun run build`, not `bun build` (that is Bun's bundler).
+
+Linting is oxlint (`.oxlintrc.json`, ported from `eslint-config-next`) and formatting is oxfmt (`.oxfmtrc.json`: single quotes, no semicolons). There is no ESLint or Prettier; do not add them. Run `bun run fmt` and `bun run lint` before committing.
 
 ## Architecture
 
@@ -52,6 +55,7 @@ Bun is both the package manager and the runtime. Never use `node`, `npm`, `npx`,
 **Velite** (`velite.config.ts`) is the content layer. It reads `.md` files from `content/`, validates frontmatter via Zod schemas, and outputs typed TypeScript to `.velite/`. Velite runs as a standalone CLI process — it is **not** a webpack plugin and must not be wired into Next.js config.
 
 Pages import content via the `#content` path alias:
+
 ```ts
 import { gardenNotes } from '#content'
 ```
@@ -60,9 +64,9 @@ The `.velite/` directory is gitignored and generated at build time.
 
 ### Collections
 
-| velite.config key | Source pattern | Fields |
-|---|---|---|
-| `gardenNotes` | `content/garden/**/*.md` | title, description, tags, source, author, published, created, updated, content, + computed `slug`, `folder` |
+| velite.config key | Source pattern           | Fields                                                                                                      |
+| ----------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `gardenNotes`     | `content/garden/**/*.md` | title, description, tags, source, author, published, created, updated, content, + computed `slug`, `folder` |
 
 - `title` falls back to the filename; `slug` is a Unicode-aware slug of the filename and must be unique (build fails on duplicates).
 - `folder` is the sub-folder inside the vault's `garden/` (`''` at top level, e.g. `'ref'`).

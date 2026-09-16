@@ -10,7 +10,10 @@
     "build:next": "bun --bun next build",
     "build": "bun run --sequential build:content build:next",
     "start": "bun --bun next start",
-    "lint": "bun --bun eslint",
+    "lint": "bun --bun oxlint",
+    "lint:fix": "bun --bun oxlint --fix",
+    "fmt": "bun --bun oxfmt",
+    "fmt:check": "bun --bun oxfmt --check",
     "prepare": "husky"
   },
   "dependencies": {
@@ -33,9 +36,9 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.6",
     "husky": "^9.1.7",
+    "oxfmt": "^0.68.0",
+    "oxlint": "^1.83.0",
     "remark-breaks": "^4.0.0",
     "shadcn": "^4.7.0",
     "tailwindcss": "^4",

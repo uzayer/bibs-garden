@@ -58,4 +58,4 @@ Raw Obsidian wikilinks (`[[Page]]`, `[[Page|Alias]]`, headings in the target, et
 
 ---
 
-*When you change publishing tools (e.g. move to Enveloppe link conversion), revisit the wikilink entry above so the log stays accurate.*
+_When you change publishing tools (e.g. move to Enveloppe link conversion), revisit the wikilink entry above so the log stays accurate._
