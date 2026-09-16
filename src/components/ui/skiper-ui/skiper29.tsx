@@ -1,7 +1,6 @@
 'use client'
 
 import { motion, useScroll, useTransform } from 'framer-motion'
-import ReactLenis from 'lenis/react'
 import Link from 'next/link'
 import React, { useRef } from 'react'
 
@@ -37,91 +36,89 @@ const Skiper29 = () => {
   const scaleImg = useTransform(scrollYProgress2, [0, 1], [1, 1.3])
 
   return (
-    <ReactLenis root>
-      <div className="flex w-screen flex-col items-center overflow-hidden bg-[#F9F7EF] text-black">
-        <div ref={gallery} className="relative flex h-[70vh] w-screen items-end overflow-hidden">
-          <div className="absolute left-0 top-0 z-10 h-1/2 w-full bg-gradient-to-t from-transparent to-black/90" />
-          <motion.img
-            src="/images/garden-hero.webp"
-            alt=""
-            className="h-screen w-full object-cover"
-            style={{ y }}
-          />
-        </div>
-        <div className="flex w-full flex-col items-center justify-center">
-          <p className="font-roman md:text-md my-10 px-6 text-center text-sm uppercase tracking-widest">
-            its a doggy dog world out there
-          </p>
-          <h1 className="font-custom h-8.5 lg:h-17 w-full border-b border-t text-center text-5xl leading-[0.9] lg:text-8xl">
-            MY GARDEN
-          </h1>
-          <div className="my-4 flex size-8 items-center justify-center rounded-full bg-black p-2 text-[#F9F7EF]">
-            <ArrowWeired />
-          </div>
-        </div>
-
-        <motion.div
-          ref={gallery2}
-          style={{ scale: scaleDiv, clipPath: 'url(#video)' }}
-          className="mt-35 relative flex aspect-video w-full items-center justify-center overflow-hidden lg:w-[80%]"
-        >
-          <SvgMask />
-          <motion.img
-            src="/images/garden-hero.webp"
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-            style={{ scale: scaleImg }}
-          />
-        </motion.div>
-
-        <div className="mt-32 flex w-full flex-col items-center justify-center">
-          <h2 className="font-custom h-8.5 lg:h-17 w-full border-t text-center text-5xl uppercase leading-[0.9] lg:text-8xl">
-            hi, i’m
-          </h2>
-          <h2 className="font-custom h-8.5 lg:h-17 w-full border-b border-t text-center text-5xl uppercase leading-[0.9] lg:text-8xl">
-            zuhayer
-          </h2>
-          <p className="font-roman md:text-md mt-10 text-sm uppercase tracking-widest">
-            designer from bangladesh 🇧🇩
-          </p>
-          <p className="mt-6 max-w-md px-6 text-center text-base leading-relaxed text-black/70">
-            This is my digital garden, a slowly growing collection of notes, images, and references
-            I pick up along the way. Nothing here is finished. Ideas get planted, revisited, and
-            pruned over time.
-          </p>
-        </div>
-
-        <div className="my-42 flex flex-col items-center justify-center uppercase">
-          <p className="font-roman md:text-md my-6 text-sm tracking-widest">sitemap</p>
-          <ul className="flex flex-col items-center justify-center gap-1.5">
-            {sitemap.map(({ label, href }) => {
-              const text = (
-                <TextRoll
-                  center
-                  className="font-custom text-4xl leading-[0.9] opacity-20 transition-opacity ease-in-out hover:opacity-100"
-                >
-                  {label}
-                </TextRoll>
-              )
-
-              return (
-                <li key={label} className="relative flex cursor-pointer flex-col items-center">
-                  {href && isExternal(href) ? (
-                    <a href={href} target="_blank" rel="noreferrer">
-                      {text}
-                    </a>
-                  ) : href ? (
-                    <Link href={href}>{text}</Link>
-                  ) : (
-                    text
-                  )}
-                </li>
-              )
-            })}
-          </ul>
+    <div className="flex w-screen flex-col items-center overflow-hidden bg-[#F9F7EF] text-black">
+      <div ref={gallery} className="relative flex h-[70vh] w-screen items-end overflow-hidden">
+        <div className="absolute left-0 top-0 z-10 h-1/2 w-full bg-gradient-to-t from-transparent to-black/90" />
+        <motion.img
+          src="/images/garden-hero.webp"
+          alt=""
+          className="h-screen w-full object-cover"
+          style={{ y }}
+        />
+      </div>
+      <div className="flex w-full flex-col items-center justify-center">
+        <p className="font-roman md:text-md my-10 px-6 text-center text-sm uppercase tracking-widest">
+          its a doggy dog world out there
+        </p>
+        <h1 className="font-custom h-8.5 lg:h-17 w-full border-b border-t text-center text-5xl leading-[0.9] lg:text-8xl">
+          MY GARDEN
+        </h1>
+        <div className="my-4 flex size-8 items-center justify-center rounded-full bg-black p-2 text-[#F9F7EF]">
+          <ArrowWeired />
         </div>
       </div>
-    </ReactLenis>
+
+      <motion.div
+        ref={gallery2}
+        style={{ scale: scaleDiv, clipPath: 'url(#video)' }}
+        className="mt-35 relative flex aspect-video w-full items-center justify-center overflow-hidden lg:w-[80%]"
+      >
+        <SvgMask />
+        <motion.img
+          src="/images/garden-hero.webp"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+          style={{ scale: scaleImg }}
+        />
+      </motion.div>
+
+      <div className="mt-32 flex w-full flex-col items-center justify-center">
+        <h2 className="font-custom h-8.5 lg:h-17 w-full border-t text-center text-5xl uppercase leading-[0.9] lg:text-8xl">
+          hi, i’m
+        </h2>
+        <h2 className="font-custom h-8.5 lg:h-17 w-full border-b border-t text-center text-5xl uppercase leading-[0.9] lg:text-8xl">
+          zuhayer
+        </h2>
+        <p className="font-roman md:text-md mt-10 text-sm uppercase tracking-widest">
+          designer from bangladesh 🇧🇩
+        </p>
+        <p className="mt-6 max-w-md px-6 text-center text-base leading-relaxed text-black/70">
+          This is my digital garden, a slowly growing collection of notes, images, and references I
+          pick up along the way. Nothing here is finished. Ideas get planted, revisited, and pruned
+          over time.
+        </p>
+      </div>
+
+      <div className="my-42 flex flex-col items-center justify-center uppercase">
+        <p className="font-roman md:text-md my-6 text-sm tracking-widest">sitemap</p>
+        <ul className="flex flex-col items-center justify-center gap-1.5">
+          {sitemap.map(({ label, href }) => {
+            const text = (
+              <TextRoll
+                center
+                className="font-custom text-4xl leading-[0.9] opacity-20 transition-opacity ease-in-out hover:opacity-100"
+              >
+                {label}
+              </TextRoll>
+            )
+
+            return (
+              <li key={label} className="relative flex cursor-pointer flex-col items-center">
+                {href && isExternal(href) ? (
+                  <a href={href} target="_blank" rel="noreferrer">
+                    {text}
+                  </a>
+                ) : href ? (
+                  <Link href={href}>{text}</Link>
+                ) : (
+                  text
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    </div>
   )
 }
 
