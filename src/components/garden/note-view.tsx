@@ -25,7 +25,14 @@ export const noteStaticParams = (section: Section) => getSlugs(section).map((slu
 export const noteMetadata = (section: Section, slug: string): Metadata => {
   const note = getNote(section, slug)
   if (!note) return {}
-  return { title: note.title, description: note.description }
+  const { title, description } = note
+  return {
+    title,
+    description,
+    // Replaces the site-wide objects, so the note's own title shows on the card
+    openGraph: { title, description, type: 'article' },
+    twitter: { card: 'summary_large_image', title, description },
+  }
 }
 
 /** Note page shared by every garden section (`/garden/[slug]`, `/refs/[slug]`). */
