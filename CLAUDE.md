@@ -53,39 +53,43 @@ Always use `pnpm`. Never `npm` or `yarn`.
 
 Pages import content via the `#content` path alias:
 ```ts
-import { allGardenNotes, allLibraryItems } from '#content'
+import { gardenNotes } from '#content'
 ```
 
 The `.velite/` directory is gitignored and generated at build time.
 
 ### Collections
 
-| velite.config key | Source pattern | Key fields |
+| velite.config key | Source pattern | Fields |
 |---|---|---|
-| `gardenNotes` | `content/garden/**/*.md` | title, tags, status, source, author, created, content |
-| `libraryItems` | `content/library/**/*.md` | title, type, status, tags, cover, rating, author, year, content |
-| `refs` | `content/ref/**/*.md` | title, tags, source, author, published, created, content |
+| `gardenNotes` | `content/garden/**/*.md` | title, description, tags, source, author, published, created, updated, content, + computed `slug`, `folder` |
 
-All collections share: `publish: boolean` (default true), `slug` (computed from filename), `content` (rendered HTML).
+- `title` falls back to the filename; `slug` is a Unicode-aware slug of the filename and must be unique (build fails on duplicates).
+- `folder` is the sub-folder inside the vault's `garden/` (`''` at top level, e.g. `'ref'`).
+- Notes with an empty body are kept with `content: ''`.
 
-Import via the `#content` alias:
-```ts
-import { gardenNotes, libraryItems, refs } from '#content'
-```
+### Vault frontmatter helpers
 
-### Null-safe schema helpers
+Empty YAML keys arrive as `null`, which Zod's `.optional()` rejects. Use the helpers at the top of `velite.config.ts` for every vault field — never `s.string().optional()` directly:
 
-The vault publisher (MkDocs Publisher plugin) writes empty YAML keys as `null`, not `undefined`. Plain `.optional()` rejects null values. Use the helpers defined at the top of `velite.config.ts` for all optional fields:
+- `nullish(schema)` — treats `null | ''` as absent
+- `vaultTags()` — `null` → `[]`, single string → list, strips leading `#`
+- `vaultAuthor()` — `string | string[] | null`, strips `[[wikilinks]]`, joins with `, `
+- `vaultDate()` — keeps the date string (`2026-02-24` or `2026-02-24 22:51`), rejects unparseable values
 
-- `yamlOptionalString()` — coerces `null | '' | undefined` → `undefined`, then validates as `string | undefined`
-- `yamlOptionalNumber()` — same for numbers
-- `vaultAuthor()` — accepts `string | string[] | null`, strips `[[wikilinks]]`, joins arrays with `, `
+### Markdown handling
 
-Never use `s.string().optional()` directly for frontmatter fields that come from the vault.
+Velite's built-in `copyLinkedFiles` is disabled. `remarkVaultLinks` replaces it: relative links to notes (`.md`) render as plain text, relative attachments are URL-decoded and copied to `public/static/`, and missing attachments become text with a build warning. `remarkBreaks` matches Obsidian's default line-break rendering; `remarkStripWikilinks` catches any leftover `[[...]]`.
 
 ### Content source
 
-`content/` is populated by the **MkDocs Publisher** Obsidian plugin (`obsidian-mkdocs-publisher`). Config in the vault at `.obsidian/plugins/obsidian-mkdocs-publisher/data.json`: repo `Uzayer/bibs-garden`, branch `main`, upload root `content/`, share key `publish`. The vault is the source of truth for file paths and frontmatter shape; Velite must accept whatever the plugin writes.
+`content/` is written **only** by the Enveloppe Obsidian plugin (`obsidian-mkdocs-publisher`); never edit it by hand, and never write back to the vault. The vault is canonical.
+
+- A note is published by moving it into the vault's `garden/` folder. Enveloppe runs in share-all mode with every path outside `garden/` excluded, so there is no `publish` frontmatter key.
+- Upload behavior mirrors vault paths: `garden/X.md` → `content/garden/X.md`. Embedded attachments → `content/assets/`.
+- Wikilinks are converted to relative Markdown links; `%%comments%%` are removed before upload.
+- Autoclean deletes `.md`/attachment files under `content/` that are no longer in the vault's `garden/`, and is restricted from touching anything outside `content/`.
+- Publishing is triggered manually from Obsidian ("Upload all shared notes" is what runs autoclean).
 
 ### Path aliases
 

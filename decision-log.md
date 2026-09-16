@@ -4,6 +4,20 @@ Architectural and product decisions for this repo, with dates. Newest first.
 
 ---
 
+## 2026-09-16 — Folder-based publishing with Enveloppe
+
+**Context:** The vault was restructured. Notes no longer carry a `publish` key, and publishing is now decided by location: a note is public if and only if it is in the vault's `garden/` folder. The previous config (share key `publish`, autoclean off, wikilinks untouched, separate `library`/`ref` collections) no longer matched.
+
+**Decision:**
+
+1. **Enveloppe** (vault `.obsidian/plugins/obsidian-mkdocs-publisher/data.json`): share-all mode with `excludedFolder: ["/^(?!garden\\/)/"]`; autoclean on, restricted by `excluded: ["/^(?!content\\/)/"]`; attachments uploaded to `content/assets`; wikilinks and internal links converted to relative Markdown links; `censorText` strips `%%comments%%`.
+2. **Velite:** a single `gardenNotes` collection whose schema matches the vault template. The `libraryItems` and `refs` collections were removed because they have no vault source anymore; vault sub-folders are exposed as `folder`.
+3. **Links:** Velite now resolves links itself (`remarkVaultLinks`) instead of `copyLinkedFiles`, which failed on URL-encoded filenames and `.md` targets. Links between notes still render as plain text; this supersedes nothing in the wikilink entry below except that Enveloppe now converts the links.
+
+**Note:** Under share-all, Enveloppe treats every link target as shared, so links to private notes still reach the repo as relative links (only their filenames and display text, never their content). Velite renders them as plain text.
+
+---
+
 ## 2026-05-13 — Wikilinks in published HTML (Velite, not the publisher)
 
 **Context:** The site is a digital garden. Obsidian publishes into this repo’s `content/` directory (via the vault’s MkDocs Publisher / Git sync workflow — see `CLAUDE.md`). [Velite](https://github.com/zce/velite) reads `content/` and emits typed data to `.velite/`.
