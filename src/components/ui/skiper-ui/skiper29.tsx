@@ -46,9 +46,9 @@ const Skiper29 = () => {
           />
         </div>
         <div className="flex w-full flex-col items-center justify-center">
-          <p className="font-roman md:text-md my-10 text-sm tracking-widest">DOCUMENTARY</p>
+          <p className="font-roman md:text-md my-10 text-sm tracking-widest">ZUHAYER</p>
           <h1 className="font-custom h-8.5 lg:h-17 w-full border-b border-t text-center text-5xl leading-[0.9] lg:text-8xl">
-            MY PROJECT X
+            MY GARDEN
           </h1>
           <div className="my-4 flex size-8 items-center justify-center rounded-full bg-black p-2 text-[#F9F7EF]">
             <ArrowWeired />
@@ -76,7 +76,7 @@ const Skiper29 = () => {
             Production
           </h1>
           <h1 className="font-custom h-8.5 lg:h-17 w-full border-t text-center text-5xl leading-[0.9] lg:text-8xl">
-            documentary
+            zuhayer
           </h1>
           <h1 className="font-custom h-8.5 lg:h-17 w-full border-b border-t text-center text-5xl leading-[0.9] lg:text-8xl">
             film tv
@@ -86,11 +86,11 @@ const Skiper29 = () => {
         <div className="my-42 flex flex-col items-center justify-center uppercase">
           <p className="font-roman md:text-md my-6 text-sm tracking-widest">sitemap</p>
           <ul className="flex flex-col items-center justify-center gap-1.5">
-            {['work', 'about', 'contact', 'privacy'].map((item) => (
+            {['notes', 'images', 'references', 'instagram'].map((item) => (
               <li key={item} className="relative flex cursor-pointer flex-col items-center">
                 <TextRoll
                   center
-                  className="font-custom text-4xl leading-[0.9]! opacity-20 transition-opacity ease-in-out hover:opacity-100"
+                  className="font-custom text-4xl leading-[0.9] opacity-20 transition-opacity ease-in-out hover:opacity-100"
                 >
                   {item}
                 </TextRoll>

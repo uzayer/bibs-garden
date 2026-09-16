@@ -61,74 +61,51 @@ export const Skiper58 = () => {
 }
 
 const STAGGER = 0.035
+// Each copy of a letter travels twice its own line box, and the clip window is padded by
+// 0.25em on each side (cancelled by a negative margin, so layout is unchanged). Together
+// that keeps the parked copy out of view regardless of the font's metrics or line-height.
+const TRAVEL = '200%'
 
 const TextRoll: React.FC<{
   children: string
   className?: string
   center?: boolean
 }> = ({ children, className, center = false }) => {
+  const letters = children.split('')
+
   return (
     <motion.span
       initial="initial"
       whileHover="hovered"
       whileTap="hovered"
-      className={cn('relative block overflow-hidden', className)}
-      style={{
-        lineHeight: 0.75,
-      }}
+      className={cn('relative -my-[0.25em] block overflow-hidden py-[0.25em]', className)}
     >
-      <div>
-        {children.split('').map((l, i) => {
-          const delay = center ? STAGGER * Math.abs(i - (children.length - 1) / 2) : STAGGER * i
+      <span className="sr-only">{children}</span>
+      <span aria-hidden className="block">
+        {letters.map((l, i) => {
+          const delay = center ? STAGGER * Math.abs(i - (letters.length - 1) / 2) : STAGGER * i
+          const transition = { ease: 'easeInOut', delay } as const
 
           return (
-            <motion.span
-              variants={{
-                initial: {
-                  y: 0,
-                },
-                hovered: {
-                  y: '-100%',
-                },
-              }}
-              transition={{
-                ease: 'easeInOut',
-                delay,
-              }}
-              className="inline-block"
-              key={i}
-            >
-              {l}
-            </motion.span>
+            <span className="relative inline-block whitespace-pre" key={i}>
+              <motion.span
+                variants={{ initial: { y: 0 }, hovered: { y: `-${TRAVEL}` } }}
+                transition={transition}
+                className="inline-block"
+              >
+                {l}
+              </motion.span>
+              <motion.span
+                variants={{ initial: { y: TRAVEL }, hovered: { y: 0 } }}
+                transition={transition}
+                className="absolute inset-0"
+              >
+                {l}
+              </motion.span>
+            </span>
           )
         })}
-      </div>
-      <div className="absolute inset-0">
-        {children.split('').map((l, i) => {
-          const delay = center ? STAGGER * Math.abs(i - (children.length - 1) / 2) : STAGGER * i
-
-          return (
-            <motion.span
-              variants={{
-                initial: {
-                  y: '100%',
-                },
-                hovered: {
-                  y: 0,
-                },
-              }}
-              transition={{
-                ease: 'easeInOut',
-                delay,
-              }}
-              className="inline-block"
-              key={i}
-            >
-              {l}
-            </motion.span>
-          )
-        })}
-      </div>
+      </span>
     </motion.span>
   )
 }
