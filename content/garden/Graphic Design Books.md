@@ -1,12 +1,10 @@
 ---
 title: Graphic Design Books
 description: graphic design books recommendations from reddit
-publish: true
 tags:
-  - type/list
   - topic/design
 source:
-created: 2026-02-18 11:39:00
+created: 2026-02-18
 ---
 
 
