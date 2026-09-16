@@ -69,3 +69,14 @@ export const noteOgImage = async (title: string, path: string) =>
     </div>,
     await fontOptions(),
   )
+
+export const appleIconSize = { width: 180, height: 180 }
+
+/** Home-screen icon: the heading font's "B" on cream, since iOS fills transparency with black */
+export const appleIcon = async () =>
+  new ImageResponse(
+    <div style={{ ...frame, alignItems: 'center', justifyContent: 'center', fontSize: 150 }}>
+      B
+    </div>,
+    { ...(await fontOptions()), ...appleIconSize },
+  )
