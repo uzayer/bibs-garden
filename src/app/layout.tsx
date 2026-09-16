@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import localFont from 'next/font/local'
 import './globals.css'
 
 const geistSans = Geist({
@@ -10,6 +11,16 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+})
+
+const skiperCustom = localFont({
+  src: './fonts/skiper-custom.woff',
+  variable: '--font-skiper-custom',
+})
+
+const skiperRoman = localFont({
+  src: './fonts/roman.woff',
+  variable: '--font-skiper-roman',
 })
 
 export const metadata: Metadata = {
@@ -23,7 +34,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} ${skiperCustom.variable} ${skiperRoman.variable} h-full antialiased`}
+    >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   )
