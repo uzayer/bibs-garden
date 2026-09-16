@@ -32,6 +32,7 @@ Use a **versioned** ID from the `library` output when the installed package vers
 
 - **Conventional Commits**: enforced by Commitlint ([Conventional Commits](https://www.conventionalcommits.org/) + `@commitlint/config-conventional`). Examples: `feat:`, `fix:`, `chore:`, `docs:`, optional scope `feat(api): ...`.
 - **No `Co-authored-by:` trailers**: Do not add `Co-authored-by:` lines for AI tools or assistants; the human author owns the commits. Husky `commit-msg` strips any such lines before Commitlint runs, but you should still omit them.
+- **Pre-commit**: Husky `pre-commit` runs `lint-staged` (`.lintstagedrc.mjs`: oxlint `--fix` + oxfmt on staged `.js/.jsx/.mjs/.cjs/.ts/.tsx`, oxfmt on staged `.json/.css` and root `.md`) then `bun run typecheck`. Files under `content/`, `.velite/`, and `public/static/` are excluded so Enveloppe's content-only commits aren't blocked.
 
 To skip hooks in an emergency (e.g. CI or recover): `HUSKY=0 git commit ...` (use sparingly).
 

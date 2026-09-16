@@ -14,6 +14,7 @@
     "lint:fix": "bun --bun oxlint --fix",
     "fmt": "bun --bun oxfmt",
     "fmt:check": "bun --bun oxfmt --check",
+    "typecheck": "bun --bun tsc --noEmit",
     "prepare": "husky"
   },
   "dependencies": {
@@ -37,6 +38,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "husky": "^9.1.7",
+    "lint-staged": "^17.5.1",
     "oxfmt": "^0.68.0",
     "oxlint": "^1.83.0",
     "remark-breaks": "^4.0.0",
