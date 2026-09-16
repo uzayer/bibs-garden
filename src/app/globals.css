@@ -158,3 +158,94 @@ html.lenis body {
   transition-duration: 1ms;
   transition-behavior: allow-discrete;
 }
+
+/* Note bodies rendered from the vault's Markdown (src/app/garden/[slug]/page.tsx) */
+@layer components {
+  .garden-prose {
+    @apply text-base leading-relaxed text-black/80;
+
+    & > * + * {
+      @apply mt-5;
+    }
+
+    & :is(h1, h2, h3, h4, h5, h6) {
+      @apply mt-14 leading-[0.9] text-black uppercase font-custom;
+    }
+    & h1 {
+      @apply border-t border-black/15 pt-4 text-4xl md:text-5xl;
+    }
+    & h2 {
+      @apply text-3xl md:text-4xl;
+    }
+    & h3 {
+      @apply text-2xl;
+    }
+    & :is(h4, h5, h6) {
+      @apply font-roman text-sm tracking-widest;
+    }
+    & :is(h1, h2, h3, h4, h5, h6) + * {
+      @apply mt-4;
+    }
+
+    & a {
+      @apply break-words text-black underline decoration-black/30 underline-offset-4 transition-colors hover:decoration-black;
+    }
+    & strong {
+      @apply font-semibold text-black;
+    }
+
+    & :is(ul, ol) {
+      @apply pl-5;
+    }
+    & ul {
+      @apply list-disc;
+    }
+    & ol {
+      @apply list-decimal;
+    }
+    & li {
+      @apply mt-1.5 pl-1 marker:text-black/40;
+    }
+    & li > :is(ul, ol) {
+      @apply mt-1.5;
+    }
+    /* Obsidian task lists */
+    & li:has(> input[type='checkbox']) {
+      @apply list-none;
+    }
+    & input[type='checkbox'] {
+      @apply mr-2 -ml-5 accent-black;
+    }
+
+    & blockquote {
+      @apply border-l-2 border-black pl-5 text-black/70 italic;
+    }
+    & hr {
+      @apply my-12 border-black/15;
+    }
+
+    & img {
+      @apply my-3 h-auto max-w-full rounded-sm;
+    }
+
+    & code {
+      @apply rounded-sm bg-black/5 px-1 py-0.5 font-mono text-[0.875em];
+    }
+    & pre {
+      @apply overflow-x-auto rounded-sm bg-black p-4 text-sm text-[#F9F7EF];
+    }
+    & pre code {
+      @apply bg-transparent p-0;
+    }
+
+    & table {
+      @apply block w-full overflow-x-auto text-sm;
+    }
+    & :is(th, td) {
+      @apply border-b border-black/15 px-3 py-2 text-left align-top;
+    }
+    & th {
+      @apply font-roman text-xs font-normal tracking-widest uppercase text-black/50;
+    }
+  }
+}
